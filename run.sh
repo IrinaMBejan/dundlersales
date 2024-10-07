@@ -48,26 +48,9 @@ function update_timestamp() {
     date +%s > "$timestamp_file"
 }
 
-# Problem: How do we manage tasks that need to run every 5 seconds?
-# Solution: Create a function for 5-second interval tasks
-function section_0() {
-    local section="EXAMPLE PROJECT: section_0"
-    local interval=5  # 5 seconds
-
-    if should_run "$section" $interval; then
-        echo "Running $section..."
-        uv run python main_pipeline_setup.py
-        uv run python main_5_secs.py
-        echo "Section 0 completed."
-        update_timestamp "$section"
-    else
-        echo "Skipping $section, not enough time has passed."
-    fi
-}
-
 # Problem: How do we handle tasks that should run every 5 minutes?
 # Solution: Create a function for 5-minute interval tasks
-function section_1() {
+function section() {
     local section="EXAMPLE PROJECT: section_1"
     local interval=300  # 5 minutes
 
@@ -81,59 +64,5 @@ function section_1() {
     fi
 }
 
-# Problem: What about tasks that need to run hourly?
-# Solution: Create a function for hourly tasks
-function section_2() {
-    local section="EXAMPLE PROJECT: section_2"
-    local interval=3600  # 1 hour
-
-    if should_run "$section" $interval; then
-        echo "Running $section..."
-        uv run python main_1_hour.py
-        echo "Section 2 completed."
-        update_timestamp "$section"
-    else
-        echo "Skipping $section, not enough time has passed."
-    fi
-}
-
-# Problem: How do we manage daily tasks and ensure dependencies are up to date?
-# Solution: Create a function for daily tasks that also updates dependencies
-function section_3() {
-    local section="EXAMPLE PROJECT: section_3"
-    local interval=86400  # 1 day
-
-    if should_run "$section" $interval; then
-        echo "Running $section..."
-        uv run python main_1_day.py
-        update_dependencies
-        echo "Section 3 completed."
-        update_timestamp "$section"
-    else
-        echo "Skipping $section, not enough time has passed."
-    fi
-}
-
-# Problem: How do we ensure all our tasks are executed in the correct order?
-# Solution: Call all section functions in the desired sequence
-section_0
-section_1
-section_2
-section_3
-
-# Congratulations! You've reached the end of the run.sh script.
-# This script solves the complex problem of managing multiple tasks
-# with different execution intervals in a SyftBox application.
-
-# To customize this for your own project:
-# 1. Identify the different intervals at which your tasks need to run
-# 2. Create or modify sections for each interval
-# 3. Replace the Python script calls with your own task scripts
-# 4. Adjust the update_dependencies function if needed
-
-# Remember: This script is typically called by a cron job frequently.
-# The 'should_run' function ensures each section only runs when appropriate,
-# solving the problem of over-execution.
-
-# Next Steps:
-# - Explore main_pipeline_setup.py to understand pipeline folder creation
+update_dependencies
+section
