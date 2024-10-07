@@ -1,11 +1,8 @@
 import os
 from syftbox.lib import ClientConfig
 import json
-from opendp.transformations import make_identity
-from opendp.measurements import make_base_laplace
-from opendp.mod import enable_features
-
-enable_features("contrib")
+import opendp.prelude as dp
+dp.enable_features('contrib')
 
 app_name = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
 
@@ -27,7 +24,9 @@ input_file_path = f"{input_folder}my_sales_number.txt"
 output_file_path = f"{output_folder}sales.json"
 
 def add_dp_noise(value, epsilon):
-    laplace_mechanism = make_base_laplace(epsilon)
+    space = (dp.atom_domain(T=int), dp.absolute_distance(T=int))
+    laplace_mechanism = dp.m.make_laplace(*space, scale=epsilon)
+    
     return laplace_mechanism(value)
 
 if os.path.exists(input_file_path):
@@ -36,11 +35,9 @@ if os.path.exists(input_file_path):
         number = int(content)
 
     overview = {}
-    overview["client_config.email"] = add_dp_noise(number, 0.1)
+    overview[client_config.email] = int(add_dp_noise(number, 1.))
 
     with open(output_file_path, "w") as f:
         json.dump(overview, f)
-
-    os.remove(input_file_path)
 else:
     print(f"Input file {input_file_path} does not exist.")
